@@ -1,20 +1,38 @@
 {
-  "name": "test",
-  "version": "1.0.1",
-  "description": "test gulp",
-  "main": "index.js",
+  "name": "base",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "dependencies": {},
+  "devDependencies": {
+    "autoprefixer-core": "^6.0.1",
+    "browser-sync": "^2.10.0",
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-imagemin": "^2.4.0",
+    "gulp-minify-css": "^1.2.1",
+    "gulp-plumber": "^1.0.1",
+    "gulp-postcss": "^6.0.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-rigger": "^0.5.8",
+    "gulp-sass": "^2.1.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^1.5.1",
+    "gulp-util": "^3.0.7",
+    "gulp-watch": "^4.3.5",
+    "imagemin-pngquant": "^4.2.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "parazitexe",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parazitexe/base.git"
+  },
+  "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-autoprefixer": "^3.1.0",
-    "gulp-concat-css": "^2.2.0",
-    "gulp-imagemin": "^2.4.0",
-    "gulp-plumber": "^1.0.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^2.1.0"
-  }
+  "bugs": {
+    "url": "https://github.com/parazitexe/base/issues"
+  },
+  "homepage": "https://github.com/parazitexe/base"
 }
