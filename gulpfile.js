@@ -1,6 +1,5 @@
 "use strict"
 
-
 //gulp
 var gulp = require ('gulp');
 
@@ -29,36 +28,17 @@ var uglify = require('gulp-uglify');
 //imageMin
 var imageMin = require('gulp-imagemin');
 var pngquant = require('imagemin-pngquant');
-//gulp-autoprefixer
-var autoprefixer = require('gulp-autoprefixer');
 
-//var postcss = require('gulp-postcss');
-//var autoprefixer = require('autoprefixer-core');
 //gulp-rename
 var rename = require('gulp-rename');
 
-<<<<<<< HEAD
-//gulp-postcss_&_autoprefixer+
-var autoprefixer = require('autoprefixer-core');
-var postcss = require('gulp-postcss');
+//gulp-autoprefixer
+var autoprefixer = require('gulp-autoprefixer');
 
-//sass
-gulp.task('sass', function () {
-    gulp.src('./scss/**/*.scss')
-        .pipe(plumber())
-        .pipe(sass())
-        .pipe(postcss([ autoprefixer({ browsers: ["> 0%"] }) ]))
-        .pipe(gulp.dest('./css'));
-});
-//sass-min
-gulp.task('sass-min', function () {
-    gulp.src('./scss/**/*.scss')
-        .pipe(plumber())
-        .pipe(sass({outputStyle: 'compressed'}))
-        .pipe(postcss([ autoprefixer({ browsers: ["> 0%"] }) ]))
-        .pipe(rename({suffix: ".min"}))
-        .pipe(gulp.dest('./css'));
-=======
+//gulp-postcss_&_autoprefixer+
+//var autoprefixer = require('autoprefixer-core');
+//var postcss = require('gulp-postcss');
+//.pipe(postcss([ autoprefixer({ browsers: ["> 0%"] }) ]))
 
 
 var path = {
@@ -69,7 +49,7 @@ var path = {
             css: 'build/static/styles/',
             img: 'build/static/images/',
             fonts: 'build/static/fonts/'
-        },
+        }
     },
     src: { //Исходники проекта
         glob: 'app/*.*',
@@ -102,20 +82,7 @@ var config = {
     logPrefix: "DEV local server"
 };
 
-//Node сервер
-gulp.task('webserver', function () {
-    browserSync.init(config);
->>>>>>> 192e56b8e2dde77f361478b08402ea575f7a9091
-});
 
-<<<<<<< HEAD
-});
-//sass:watch
-gulp.task('styles:watch', function () {
-    gulp.watch('./scss/**/*.scss', ['sass', 'sass-min']);
-});
-=======
->>>>>>> 192e56b8e2dde77f361478b08402ea575f7a9091
 
 gulp.task('styles:static', function () {
     return gulp.src(path.src.sass)
@@ -177,7 +144,7 @@ gulp.task('static', [
     'styles:static',
     //'image:static',
     'js:static',
-    'font:static',
+    'font:static'
     //'sprite:static',
 ]);
 
@@ -201,13 +168,6 @@ gulp.task('watch', function(){
     watch([path.watch.fonts], function(event, cb) {
         gulp.start('font:static');
     });
-
-<<<<<<< HEAD
-//default
-gulp.task('default',["styles"], function() {
-
-=======
->>>>>>> 192e56b8e2dde77f361478b08402ea575f7a9091
 });
 
 
