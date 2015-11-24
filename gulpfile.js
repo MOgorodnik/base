@@ -82,6 +82,10 @@ var config = {
     logPrefix: "DEV local server"
 };
 
+//Node сервер
+gulp.task('webserver', ['static'], function () {
+    browserSync.init(config);
+});
 
 
 gulp.task('styles:static', function () {
