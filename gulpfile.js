@@ -18,15 +18,16 @@ var imageMin = require('gulp-imagemin');
 //gulp-rename+
 var rename = require('gulp-rename');
 
-//gulp-autoprefixer-
-var autoprefixer = require('gulp-autoprefixer');
-
+//gulp-postcss_&_autoprefixer+
+var autoprefixer = require('autoprefixer-core');
+var postcss = require('gulp-postcss');
 
 //sass
 gulp.task('sass', function () {
     gulp.src('./scss/**/*.scss')
         .pipe(plumber())
         .pipe(sass())
+        .pipe(postcss([ autoprefixer({ browsers: ["> 0%"] }) ]))
         .pipe(gulp.dest('./css'));
 });
 //sass-min
@@ -34,6 +35,7 @@ gulp.task('sass-min', function () {
     gulp.src('./scss/**/*.scss')
         .pipe(plumber())
         .pipe(sass({outputStyle: 'compressed'}))
+        .pipe(postcss([ autoprefixer({ browsers: ["> 0%"] }) ]))
         .pipe(rename({suffix: ".min"}))
         .pipe(gulp.dest('./css'));
 });
@@ -42,7 +44,7 @@ gulp.task('styles', ['sass', 'sass-min'], function (){
 
 });
 //sass:watch
-gulp.task('sass:watch', function () {
+gulp.task('styles:watch', function () {
     gulp.watch('./scss/**/*.scss', ['sass', 'sass-min']);
 });
 
@@ -67,8 +69,7 @@ gulp.task('imageMin', function () {
 
 
 //default
-gulp.task('default', function() {
-    console.log("123")
-    // place code for your default task here
+gulp.task('default',["styles"], function() {
+
 });
 
