@@ -4,6 +4,9 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+<<<<<<< HEAD
     <orderEntry type="library" name="base node_modules" level="project" />
+=======
+>>>>>>> 192e56b8e2dde77f361478b08402ea575f7a9091
   </component>
 </module>

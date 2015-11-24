@@ -1,0 +1,271 @@
+'use strict';
+
+//python 2.7 + npm install -g node-gyp
+
+    "gulp": "^3.9.0",
+    "gulp-watch": "^4.2.4",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-rigger": "^0.5.8",
+    "browser-sync": "^2.9.3",
+    "gulp-sass": "^2.0.3",
+    "gulp-minify-css": "^1.1.6",
+    "gulp-uglify": "^1.2.0",
+    "gulp-imagemin": "^2.2.1",
+    "imagemin-pngquant": "^4.1.0",
+    "gulp-autoprefixer": "^2.3.1"
+
+
+
+'use strict';
+
+var gulp = require('gulp'),
+    watch = require('gulp-watch'),
+    plumber = require('gulp-plumber'),
+    gutil = require('gulp-util'),
+    autoprefixer = require('gulp-autoprefixer'),
+    uglify = require('gulp-uglify'),
+    eslint = require('gulp-eslint'),
+    sass = require('gulp-sass'),
+    sourcemaps = require('gulp-sourcemaps'),
+    rigger = require('gulp-rigger'),
+    minifyCss = require('gulp-minify-css'),
+    imagemin = require('gulp-imagemin'),
+    pngquant = require('imagemin-pngquant'),
+    sprite = require('gulp.spritesmith'),
+    del = require('del'),
+    browserSync = require("browser-sync").create(),
+    reload = browserSync.reload;
+
+
+//Модули для внутреннего использования
+var merge = require('merge-stream'),
+    fs = require('fs'),
+    fsFinder = require('fs-finder'),
+    pathModule = require('path');
+
+//Пути проекта
+var path = {
+    build: {
+      static: { //Версия билда для разработки
+        html: 'build/static/',
+        js: 'build/static/scripts/',
+        css: 'build/static/styles/',
+        img: 'build/static/images/',
+        fonts: 'build/static/fonts/'
+      },
+      sitecore: { //Версия билда на продакшн
+        html: '../Website/',
+        js: '../Website/scripts/',
+        css: '../Website/styles/',
+        img: '../Website/images/',
+        fonts: '../Website/fonts/'
+      }
+    },
+    src: { //Исходники проекта
+        glob: 'app/*.*',
+        html: 'app/*.html',
+        js: 'app/scripts/main.js',
+        sass: 'app/styles/styles.scss',
+        img: 'app/images/**/*.*',
+        fonts: 'app/fonts/**/*.*'
+    },
+    watch: { //Пути для наблюдателя
+        glob: 'app/*.*',
+        html: 'app/**/*.html',
+        js: 'app/scripts/**/*.js',
+        style: 'app/styles/**/*.scss',
+        img: 'app/images/**/*.*',
+        fonts: 'app/fonts/**/*.*'
+    },
+    clean: './build' //Удаление скомпиленых файлов
+};
+
+//Конфигурация для сервера
+var config = {
+    server: {
+        baseDir: "./build/static",
+        directory: true
+    },
+    //proxy: 'hostname',
+    host: 'localhost',
+    port: 9000,
+    logPrefix: "G4S DEV local server"
+};
+
+
+gulp.task('style:static', ['sprite:static'], function () {
+    return gulp.src(path.src.sass)
+        .pipe(plumber({errorHandler: errorPretify}))
+        .pipe(sourcemaps.init())
+        .pipe(sass())
+        .pipe(autoprefixer({browsers: ['> 1%', 'last 2 versions', 'Firefox ESR']}))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(path.build.static.css))
+        .pipe(minifyCss())
+        .pipe(gulp.dest(path.build.sitecore.css))
+        .pipe(reload({stream: true}));
+});
+
+gulp.task('js:static', function () {
+    return gulp.src(path.src.js)
+        .pipe(plumber({errorHandler: errorPretify}))
+        .pipe(rigger())
+        .pipe(sourcemaps.init())
+        //.pipe(eslint())
+        //.pipe(eslint.format())
+        .pipe(uglify())
+        .pipe(gulp.dest(path.build.sitecore.js))
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest(path.build.static.js))
+        .pipe(reload({stream: true}));
+});
+
+gulp.task('html:static', function () {
+    return gulp.src(path.src.html)
+        .pipe(plumber({errorHandler: errorPretify}))
+        .pipe(rigger())
+        .pipe(gulp.dest(path.build.static.html))
+        .pipe(reload({stream: true}));
+});
+
+gulp.task('image:static', function () {
+    return gulp.src([path.src.img, '!app/images/sprites/**' ])
+        .pipe(imagemin({
+            progressive: true,
+            svgoPlugins: [{
+                removeViewBox: false,
+                cleanupIDs: false
+            }],
+            use: [pngquant()]
+        }))
+        .pipe(gulp.dest(path.build.sitecore.img))
+        .pipe(gulp.dest(path.build.static.img));
+});
+
+gulp.task('sprite:static', function() {
+    var spriteDirMask = 'sprite-*';
+    var streams = [];
+
+    var dirs = fsFinder.in('app/images/sprites').findDirectories(spriteDirMask);
+
+    dirs.forEach(function (dir, ind) {
+        dir = pathModule.normalize(dir);
+
+        var dirName = dir.match(/(?:\\)(sprite-.+)/)[1];
+
+        var spriteData =
+            gulp.src(dir + '/*.png') // source path of the sprite images
+                .pipe(sprite({
+                    imgName: dirName + '.png',
+                    imgPath: '../../images/' + dirName + '.png',
+                    cssName: '_' + dirName + '.scss',
+                    cssFormat: 'sass',
+                    cssTemplate: "spritesmith-retina-mixins.template.mustache",
+                    cssOpts: {
+                        varName: dirName
+                    }
+                }));
+
+        var imgStream = spriteData.img
+            .pipe(imagemin({
+                progressive: true,
+                svgoPlugins: [{
+                    removeViewBox: false,
+                    cleanupIDs: false
+                }],
+                use: [pngquant()]
+            }))
+            .pipe(gulp.dest(path.build.sitecore.img))
+            .pipe(gulp.dest(path.build.static.img)); // output path for the sprite
+
+        var styleStream = spriteData.css
+            .pipe(gulp.dest('app/styles/helpers')); // output path for the SCSS
+        streams.push(imgStream, styleStream);
+    });
+    return streams.length ? merge(streams) : true;
+});
+
+gulp.task('font:static', function () {
+    return gulp.src(path.src.fonts)
+        .pipe(gulp.dest(path.build.sitecore.fonts))
+        .pipe(gulp.dest(path.build.static.fonts));
+});
+
+gulp.task('extras:static', function () {
+    return gulp.src([
+            path.src.glob,
+            '!' + path.src.html
+        ], {
+            dot: true
+        })
+        .pipe(gulp.dest(path.build.sitecore.html))
+        .pipe(gulp.dest(path.build.static.html));
+});
+
+//Версия для разработки
+gulp.task('static', [
+    'html:static',
+    'js:static',
+    'font:static',
+    'style:static',
+    'image:static',
+    //'sprite:static',
+    'extras:static'
+]);
+
+
+//Наблюдатель за исходниками
+gulp.task('watch', function(){
+    watch([path.watch.html], function(event, cb) {
+        gulp.start('html:static');
+    });
+    watch([path.watch.style], function(event, cb) {
+        gulp.start('style:static');
+    });
+    watch([path.watch.js], function(event, cb) {
+        gulp.start('js:static');
+    });
+    watch([path.watch.img, '!app/images/sprites/**'], function(event, cb) {
+        gulp.start('image:static');
+    });
+    watch([path.watch.img + '/sprites'], function(event, cb) {
+        gulp.start('sprite:static');
+    });
+    watch([path.watch.fonts], function(event, cb) {
+        gulp.start('font:static');
+    });
+
+});
+
+//Node сервер
+gulp.task('webserver', ['static'], function () {
+    browserSync.init(config);
+});
+
+gulp.task('clean:static', function () {
+    del([
+        path.build.static.css,
+        path.build.static.js,
+        path.build.static.fonts,
+        path.build.static.img,
+        path.build.static.html + '*.html',
+
+        path.build.sitecore.css,
+        path.build.sitecore.js,
+        path.build.sitecore.fonts,
+        path.build.sitecore.img
+    ])
+});
+
+gulp.task('default', ['webserver', 'watch']);
+
+//Логер ошибок
+function errorPretify(error) {
+    var c = gutil.colors;
+    gutil.beep();
+    gutil.log(
+        gutil.template(c.red('<%= name %>') + ' in ' + c.bold.cyan('<%= plugin %>') + '\n' + c.bgRed('<%= message %>'), error)
+    );
+    this.emit('end');
+}
